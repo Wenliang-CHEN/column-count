@@ -20,19 +20,20 @@ func main() {
 	lineCount := 0
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		line := scanner.Text()
-		if line == "NULL" {
-			line = "{any default value}"
+		line := strings.Trim(scanner.Text(), "\"")
+		if strings.ToLower(line) == "null" {
+			line = "last_name,first_name,email,main-salary"
 		}
-		items := strings.Split(scanner.Text(), ",")
+		items := unique(strings.Split(line, ","))
+
 		for _, item := range items {
-			if strings.Contains(item, "{any excluded}") {
+			if strings.Contains(item, "dynamic_") {
 				continue
 			}
 
-			key := strings.ToLower(strings.Split(strings.Trim(item, " \"\\N"),":")[0]) 
+			key := strings.ToLower(strings.Split(item,":")[0]) 
 
-			if key == "" {
+			if key == ""{
 				continue
 			}
 
@@ -58,6 +59,18 @@ func main() {
 	for _, column := range columns {
 		fmt.Printf("|%v|%.2f%%|\n", column.name, column.ratio*100)
 	}
+}
+
+func unique(intSlice []string) []string {
+	keys := make(map[string]bool)
+	list := []string{} 
+	for _, entry := range intSlice {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			list = append(list, entry)
+		}
+	}    
+	return list
 }
 
 type Column struct {
